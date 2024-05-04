@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PlayerConts : MonoBehaviour
 {
-    public float lastDirection;
+    public float lastDirection, knockback;
     bool usingAbility;
     // Start is called before the first frame update
     void Start()
@@ -51,6 +51,52 @@ public class PlayerConts : MonoBehaviour
         rb.AddForce(direction.normalized * force, ForceMode2D.Impulse);
     }
 
+    bool pogoing;
+    public void PoGoPlayer(Vector2 newVelo)
+    {
+        Vector2 setVelo = rb.velocity;
+        setVelo.y = newVelo.y;
+        setVelo.x += newVelo.x;
+        rb.velocity = setVelo;
+        dashed = false;
+        pogoing = true;
+        Invoke("PogoOut", 0.2f);
+    }
+
+    void PogoOut()
+    {
+        pogoing = false;
+    }
+
+    bool stunned, invcib;
+    public IEnumerator TakeHit(Transform hitter)
+    {
+        if (invcib || pogoing)
+        {
+            yield break;
+        }
+        stunned = true;
+        invcib = true;
+        Vector2 hitForce = (transform.position - hitter.position).normalized;
+        hitForce.x = hitForce.x > 0 ? 1 : -1;
+        if (IsGrounded())
+        {
+            hitForce.x *= knockback;
+            hitForce.y = 3;
+        }
+        else
+        {
+            hitForce.x *= knockback * 4;
+            hitForce.y = 3;
+        }
+        print(hitForce);
+        rb.velocity = hitForce;
+        yield return new WaitForSeconds(1);
+        stunned = false;
+        yield return new WaitForSeconds(1);
+        invcib = false;
+    }
+
     [Header("Camera Stuff")]
     [SerializeField] Transform camLock;
     [SerializeField] float yOffset;
@@ -78,6 +124,10 @@ public class PlayerConts : MonoBehaviour
         }
 
         Vector2 moveDir = new Vector2(Input.GetAxisRaw("Horizontal"), 0);
+        if (stunned)
+        {
+            moveDir = Vector2.zero;
+        }
 
         //set direction player is moving for attacks and abilities
         if (moveDir.x < 0)
@@ -120,7 +170,7 @@ public class PlayerConts : MonoBehaviour
 
 
         // slow player down while moving whithout using drag because of vertical movement
-        if (moveDir.x == 0)
+        if (moveDir.x == 0 && !stunned)
         {
             Vector2 artSlow = rb.velocity;
             if (rb.velocity.x > 0)
@@ -152,7 +202,7 @@ public class PlayerConts : MonoBehaviour
     // dash disableing other movement and powers 
     public IEnumerator PlayerDash()
     {
-        if (dashed)
+        if (dashed || stunned)
         {
             yield break;
         }
@@ -186,6 +236,10 @@ public class PlayerConts : MonoBehaviour
         usingAbility = false;
 
         yield return new WaitForSeconds(dashCD);
+        while (!IsGrounded())
+        {
+            yield return new WaitForEndOfFrame();
+        }
         dashed = false;
 
         yield break;
@@ -204,6 +258,7 @@ public class PlayerConts : MonoBehaviour
         {
             return;
         }
+
         // change result if jumping from wall
         if (Input.GetKeyDown(KeyCode.Space) && onWall)
         {
@@ -229,7 +284,7 @@ public class PlayerConts : MonoBehaviour
             airTime = 0;
         }
 
-        if (Input.GetKeyUp(KeyCode.Space))
+        if (Input.GetKeyUp(KeyCode.Space) || stunned)
         {
             jumping = false;
         }
@@ -267,7 +322,7 @@ public class PlayerConts : MonoBehaviour
         }
     }
 
-    bool IsGrounded()
+    public bool IsGrounded()
     {
         Collider2D[] hits = Physics2D.OverlapCircleAll(jumpCheck.position, 0.2f, jumpLayer);
         return hits.Length > 0;
@@ -295,6 +350,10 @@ public class PlayerConts : MonoBehaviour
     // check if the player is greabbing a wall;
     bool WallGrab()
     {
+        if (stunned)
+        {
+            return false;
+        }
         Collider2D[] hits = Physics2D.OverlapBoxAll(wallCheckL.position, boxCheck, 0, jumpLayer);
         Collider2D[] hitsB = Physics2D.OverlapBoxAll(wallCheckR.position, boxCheck, 0, jumpLayer);
         return (hits.Length + hitsB.Length) > 0 && !IsGrounded();
@@ -304,12 +363,20 @@ public class PlayerConts : MonoBehaviour
     // find which wall the player is grabbing
     bool LeftWallGrab()
     {
+        if (stunned)
+        {
+            return false;
+        }
         Collider2D[] hits = Physics2D.OverlapBoxAll(wallCheckL.position, boxCheck, 0, jumpLayer);
         return hits.Length > 0 && !IsGrounded();
     }
 
     bool RightWallGrab()
     {
+        if (stunned)
+        {
+            return false;
+        }
         Collider2D[] hits = Physics2D.OverlapBoxAll(wallCheckR.position, boxCheck, 0, jumpLayer);
         return hits.Length > 0 && !IsGrounded();
     }
