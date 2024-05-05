@@ -236,8 +236,9 @@ public class PlayerConts : MonoBehaviour
         usingAbility = false;
 
         yield return new WaitForSeconds(dashCD);
-        while (!IsGrounded())
+        while (!IsGrounded() && !WallGrab())
         {
+            print("waitfordash");
             yield return new WaitForEndOfFrame();
         }
         dashed = false;
