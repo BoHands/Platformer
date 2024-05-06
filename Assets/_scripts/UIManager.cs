@@ -10,7 +10,8 @@ public class UIManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        HandleHPDisplay(2);
+        DontDestroyOnLoad(gameObject);
     }
 
     // Update is called once per frame
@@ -25,7 +26,11 @@ public class UIManager : MonoBehaviour
         {
             if (i >= toDis)
             {
-
+                hpPoints[i].color = red;
+            }
+            else
+            {
+                hpPoints[i].color = green;
             }
         }
     }

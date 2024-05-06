@@ -205,6 +205,8 @@ MonoBehaviour:
   pogoY: 8
   pogoX: 10
   swipePrefab: {fileID: 6642502542195276629, guid: 748dd318192946748af683d2a9722a99, type: 3}
+  maxHp: 4
+  hp: 0
 --- !u!114 &80861943722506824
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -245,7 +247,7 @@ MonoBehaviour:
   wallCheckR: {fileID: 3590971146488113759}
   wallSlide: 2
   xPower: 1000
-  yBoost: 1.2
+  yBoost: 1.4
 --- !u!50 &509875488123975047
 Rigidbody2D:
   serializedVersion: 4

@@ -9,10 +9,26 @@ public class PlayerCombat : MonoBehaviour
     [SerializeField] float pogoY, pogoX;
     public GameObject swipePrefab;
     PlayerConts playMove;
+
+    public int maxHp, hp;
+    UIManager uiMan;
     // Start is called before the first frame update
     void Start()
     {
         playMove = GetComponent<PlayerConts>();
+        uiMan = FindObjectOfType<UIManager>();
+        hp = maxHp;
+        uiMan.HandleHPDisplay(hp);
+    }
+
+    public void HpHit()
+    {
+        hp--;
+        if (hp <= 0)
+        {
+            print("PlayerDead");
+        }
+        uiMan.HandleHPDisplay(hp);
     }
 
     // Update is called once per frame

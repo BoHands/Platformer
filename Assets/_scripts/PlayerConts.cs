@@ -6,6 +6,7 @@ public class PlayerConts : MonoBehaviour
 {
     public float lastDirection, knockback;
     bool usingAbility;
+    PlayerCombat playComb;
     // Start is called before the first frame update
     void Start()
     {
@@ -14,6 +15,7 @@ public class PlayerConts : MonoBehaviour
         {
             lastDirection = 1;
         }
+        playComb = GetComponent<PlayerCombat>();
     }
 
     // Update is called once per frame
@@ -89,7 +91,8 @@ public class PlayerConts : MonoBehaviour
             hitForce.x *= knockback * 4;
             hitForce.y = 3;
         }
-        print(hitForce);
+        playComb.HpHit();
+        //print(hitForce);
         rb.velocity = hitForce;
         yield return new WaitForSeconds(1);
         stunned = false;
@@ -265,6 +268,7 @@ public class PlayerConts : MonoBehaviour
         {
             wallJumping = true;
             airTime = 0;
+            rb.velocity = Vector2.zero;
 
             if (LeftWallGrab())
             {
